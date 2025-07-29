@@ -186,6 +186,19 @@ h4 {
     margin-right: 0.5rem;
 }
 
+.doi-link {
+    color: #4a7c7e;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+}
+
+.doi-link:hover {
+    text-decoration: underline;
+    color: #16213e;
+}
+
 .more-publications {
     text-align: center;
     margin-top: 1rem;
@@ -228,9 +241,10 @@ footer p {
 
 .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
     margin-bottom: 3rem;
+    max-width: 100%;
 }
 
 .gallery-item {
@@ -242,13 +256,13 @@ footer p {
 }
 
 .gallery-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .gallery-item img {
     width: 100%;
-    height: 200px;
+    height: 150px;
     object-fit: cover;
     display: block;
 }
@@ -285,11 +299,16 @@ footer p {
     }
     
     .gallery-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
     }
     
     .gallery-item img {
-        height: 150px;
+        height: 120px;
+    }
+    
+    .gallery-item p {
+        padding: 0.5rem;
+        font-size: 0.85rem;
     }
 }
