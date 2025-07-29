@@ -177,6 +177,13 @@ h4 {
     background: #f8f9fa;
     border-radius: 8px;
     border-left: 4px solid #4a7c7e;
+    position: relative;
+}
+
+.pub-number {
+    font-weight: bold;
+    color: #4a7c7e;
+    margin-right: 0.5rem;
 }
 
 .more-publications {
@@ -210,6 +217,51 @@ footer p {
     margin-bottom: 0.5rem;
 }
 
+.gallery-content h3 {
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.gallery-content h3:first-child {
+    margin-top: 0;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.gallery-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.gallery-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+.gallery-item p {
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #333;
+    background: white;
+    margin: 0;
+}
+
 @media (max-width: 768px) {
     nav ul {
         flex-wrap: wrap;
@@ -230,5 +282,14 @@ footer p {
     
     .skills-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+    
+    .gallery-item img {
+        height: 150px;
     }
 }
