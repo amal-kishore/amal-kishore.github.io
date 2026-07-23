@@ -81,7 +81,7 @@ nav a:hover {
 .hero {
   background: linear-gradient(150deg, var(--navy-dark) 0%, var(--navy) 100%);
   color: white;
-  padding: 7rem 2rem 5rem;
+  padding: 4rem 2rem 3rem;
   position: relative; overflow: hidden;
 }
 
