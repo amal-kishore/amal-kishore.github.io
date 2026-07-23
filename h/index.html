@@ -300,49 +300,71 @@ html, body {
 body.second-read .mnote { opacity: .72; }
 
 /* ═══════════════════════════════════════════════════════════
-   CH1 — JIGSAW
+   CH1 — WORD PUZZLE
 ═══════════════════════════════════════════════════════════ */
-.puzzle-wrap {
-  display: flex; gap: 36px; justify-content: center;
-  align-items: flex-start; flex-wrap: wrap;
-  max-width: 860px; width: 100%;
+.sukna-frame {
+  position: relative;
+  width: min(400px, 88vw);
+  border-radius: 4px; overflow: hidden;
+  box-shadow: 0 10px 50px rgba(0,0,0,.55);
+  border: 1px solid rgba(201,168,76,.2);
+  margin-bottom: 32px;
+}
+.sukna-img {
+  width: 100%; height: 260px;
+  object-fit: cover; display: block;
+  filter: brightness(.92) saturate(1.05);
+}
+.sukna-vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(9,8,26,.45) 100%);
 }
 
-.puzzle-board {
-  display: grid;
-  grid-template-columns: repeat(4, var(--ps, 80px));
-  grid-template-rows:    repeat(4, var(--ps, 80px));
-  gap: 2px;
+.word-hint {
+  font-family: var(--serif); font-size: .95rem; font-style: italic;
+  color: rgba(245,233,204,.38); margin-bottom: 22px; letter-spacing: .05em;
+}
+
+.letter-tiles {
+  display: flex; gap: 10px; justify-content: center;
+  margin-bottom: 22px; flex-wrap: wrap;
+}
+.l-tile {
+  width: 52px; height: 52px;
   background: rgba(201,168,76,.07);
-  border: 1px solid rgba(201,168,76,.18);
-  padding: 9px; border-radius: 3px;
-}
-.p-slot {
-  width: var(--ps, 80px); height: var(--ps, 80px);
-  border: 1px dashed rgba(201,168,76,.18); border-radius: 2px;
-  transition: border-color .2s, background .2s;
-}
-.p-slot.hover   { border-color: var(--gold); background: rgba(201,168,76,.08); }
-.p-slot.correct { border-style: solid; border-color: var(--gold); }
-
-.puzzle-tray {
-  display: grid;
-  grid-template-columns: repeat(4, var(--ps, 80px));
-  gap: 7px;
-}
-.p-piece {
-  width: var(--ps, 80px); height: var(--ps, 80px);
-  cursor: grab; border-radius: 2px;
-  border: 1px solid rgba(201,168,76,.18);
-  transition: transform .15s, box-shadow .15s;
+  border: 1px solid rgba(201,168,76,.28);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-size: 1.5rem; font-style: italic;
+  color: var(--parchment); cursor: pointer;
+  transition: background .2s, border-color .2s, transform .15s, opacity .3s;
   user-select: none;
-  touch-action: none;
 }
-.p-piece:hover { transform: scale(1.06); box-shadow: 0 5px 18px rgba(0,0,0,.55); z-index: 50; }
-.p-piece.grabbing { opacity: .65; transform: scale(1.1); cursor: grabbing; box-shadow: 0 10px 28px rgba(0,0,0,.6); z-index: 200; }
+.l-tile:hover:not(.used) {
+  background: rgba(201,168,76,.16); border-color: var(--gold);
+  transform: translateY(-3px);
+}
+.l-tile.used { opacity: .18; cursor: default; pointer-events: none; transform: none; }
 
-@media (max-width: 560px) {
-  .puzzle-board, .puzzle-tray { --ps: 62px; }
+.answer-slots {
+  display: flex; gap: 12px; justify-content: center; margin-bottom: 14px;
+}
+.a-slot {
+  width: 52px; height: 52px;
+  border-bottom: 2px solid rgba(201,168,76,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-size: 1.5rem; font-style: italic;
+  color: var(--gold); cursor: pointer;
+  transition: border-color .2s, color .2s;
+  user-select: none;
+}
+.a-slot.filled { border-bottom-color: rgba(201,168,76,.6); }
+.a-slot:hover.filled { border-bottom-color: var(--gold); color: rgba(201,168,76,.6); }
+
+.word-msg {
+  font-family: var(--body); font-size: .95rem; font-style: italic;
+  color: rgba(201,168,76,.5); min-height: 1.4em; margin-top: 4px;
+  transition: opacity .4s;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -800,12 +822,15 @@ body.second-read .mnote { opacity: .72; }
   <div class="ch-sub">How everything began.</div>
 
   <!-- PUZZLE -->
-  <div id="ch1-puzzle">
-    <div class="hint-text">Piece it back together — the way it all began.</div>
-    <div class="puzzle-wrap">
-      <div class="puzzle-board" id="pb"></div>
-      <div class="puzzle-tray"  id="pt"></div>
+  <div id="ch1-puzzle" style="display:flex; flex-direction:column; align-items:center; gap:0;">
+    <div class="sukna-frame">
+      <img src="photos/us/sukna_lake.jpg" class="sukna-img" alt="">
+      <div class="sukna-vignette"></div>
     </div>
+    <div class="word-hint">Where did it begin?</div>
+    <div class="letter-tiles" id="word-tiles"></div>
+    <div class="answer-slots" id="word-answer"></div>
+    <div class="word-msg" id="word-msg"></div>
   </div>
 
   <!-- REWARD -->
@@ -1333,94 +1358,90 @@ function enterChapter(idx) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   CHAPTER 1 — JIGSAW
+   CHAPTER 1 — WORD PUZZLE (unscramble SUKNA)
 ───────────────────────────────────────────────────────── */
-let _jigsawDone = false;
-let _dragging   = null;
+const WORD1       = 'SUKNA';
+let   _wordDone   = false;
+let   _wordProg   = [];   // [{letter, tileIdx}]
 
-function initJigsaw() {
-  if (_jigsawDone) return;
-  const GRID = 4, PS = window.innerWidth < 560 ? 62 : 80;
-  const board = document.getElementById('pb');
-  const tray  = document.getElementById('pt');
-  board.innerHTML = tray.innerHTML = '';
+function initJigsaw() {   // called by enterChapter(0) — keeps the name
+  if (_wordDone) return;
+  _wordProg = [];
 
-  /* board slots */
-  for (let i = 0; i < GRID * GRID; i++) {
-    const slot = document.createElement('div');
-    slot.className = 'p-slot';
-    slot.dataset.slot = i;
-    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('hover'); });
-    slot.addEventListener('dragleave', () => slot.classList.remove('hover'));
-    slot.addEventListener('drop', e => { e.preventDefault(); slot.classList.remove('hover'); drop(slot); });
-    board.appendChild(slot);
-  }
+  const tilesEl  = document.getElementById('word-tiles');
+  const answerEl = document.getElementById('word-answer');
+  tilesEl.innerHTML = answerEl.innerHTML = '';
+  document.getElementById('word-msg').textContent = '';
 
-  /* pieces — shuffled */
-  const idx = shuffle(Array.from({ length: GRID * GRID }, (_, i) => i));
-  idx.forEach(pi => {
-    const col = pi % GRID, row = Math.floor(pi / GRID);
-    const p = document.createElement('div');
-    p.className = 'p-piece';
-    p.dataset.pi = pi;
-    p.draggable = true;
-    p.style.backgroundImage  = `url('${CFG.jigsawPhoto}')`;
-    p.style.backgroundSize   = `${GRID * PS}px ${GRID * PS}px`;
-    p.style.backgroundPosition = `-${col * PS}px -${row * PS}px`;
-    p.style.width = p.style.height = PS + 'px';
-
-    p.addEventListener('dragstart', e => { _dragging = p; p.classList.add('grabbing'); e.dataTransfer.effectAllowed = 'move'; });
-    p.addEventListener('dragend',   () => { p.classList.remove('grabbing'); _dragging = null; });
-
-    /* touch */
-    let tx, ty;
-    p.addEventListener('touchstart', e => {
-      _dragging = p; p.classList.add('grabbing');
-      const t = e.touches[0]; tx = t.clientX; ty = t.clientY;
-    }, { passive: true });
-    p.addEventListener('touchmove', e => {
-      e.preventDefault();
-      const t = e.touches[0];
-      p.style.position = 'fixed'; p.style.zIndex = '500';
-      p.style.left = (t.clientX - PS / 2) + 'px';
-      p.style.top  = (t.clientY - PS / 2) + 'px';
-    }, { passive: false });
-    p.addEventListener('touchend', e => {
-      e.preventDefault();
-      p.style.cssText = '';
-      p.classList.remove('grabbing');
-      const t = e.changedTouches[0];
-      const el = document.elementFromPoint(t.clientX, t.clientY);
-      const sl = el?.closest('.p-slot');
-      if (sl) drop(sl);
-      _dragging = null;
-    }, { passive: false });
-
-    tray.appendChild(p);
+  /* shuffled letter tiles */
+  const letters = shuffle([...WORD1]);
+  letters.forEach((letter, i) => {
+    const t = document.createElement('div');
+    t.className = 'l-tile';
+    t.textContent = letter;
+    t.dataset.letter = letter;
+    t.dataset.idx = i;
+    t.addEventListener('click', () => pickLetter(t));
+    tilesEl.appendChild(t);
   });
+
+  /* answer slots */
+  for (let i = 0; i < WORD1.length; i++) {
+    const s = document.createElement('div');
+    s.className = 'a-slot';
+    s.dataset.pos = i;
+    s.addEventListener('click', () => unpickLetter(i));
+    answerEl.appendChild(s);
+  }
 }
 
-function drop(slot) {
-  if (!_dragging) return;
-  if (slot.firstChild) document.getElementById('pt').appendChild(slot.firstChild);
-  slot.appendChild(_dragging);
-  const PS = window.innerWidth < 560 ? 62 : 80;
-  _dragging.style.width = _dragging.style.height = PS + 'px';
-  if (parseInt(_dragging.dataset.pi) === parseInt(slot.dataset.slot)) {
-    slot.classList.add('correct');
-    _dragging.style.boxShadow = '0 0 10px rgba(201,168,76,.9)';
-  }
-  checkJigsaw();
+function pickLetter(tile) {
+  if (tile.classList.contains('used') || _wordDone) return;
+  const pos = _wordProg.length;
+  if (pos >= WORD1.length) return;
+
+  tile.classList.add('used');
+  _wordProg.push({ letter: tile.dataset.letter, idx: tile.dataset.idx });
+
+  const slot = document.querySelectorAll('.a-slot')[pos];
+  slot.textContent = tile.dataset.letter;
+  slot.classList.add('filled');
+
+  if (_wordProg.length === WORD1.length) checkWord();
 }
 
-function checkJigsaw() {
-  if (_jigsawDone) return;
-  const slots = document.querySelectorAll('#pb .p-slot');
-  const ok = [...slots].every(s => {
-    const p = s.firstChild;
-    return p && parseInt(p.dataset.pi) === parseInt(s.dataset.slot);
-  });
-  if (ok) { _jigsawDone = true; setTimeout(rewardCh1, 700); }
+function unpickLetter(pos) {
+  /* only remove from the end — keeps it simple */
+  if (_wordProg.length === 0 || pos !== _wordProg.length - 1) return;
+  const removed = _wordProg.pop();
+
+  document.querySelectorAll('.l-tile')[removed.idx].classList.remove('used');
+
+  const slot = document.querySelectorAll('.a-slot')[pos];
+  slot.textContent = '';
+  slot.classList.remove('filled');
+}
+
+function checkWord() {
+  const formed = _wordProg.map(p => p.letter).join('');
+  if (formed === WORD1) {
+    _wordDone = true;
+    document.getElementById('word-msg').textContent = '✓';
+    setTimeout(rewardCh1, 700);
+  } else {
+    const answerEl = document.getElementById('word-answer');
+    answerEl.classList.add('shake');
+    setTimeout(() => {
+      answerEl.classList.remove('shake');
+      _wordProg = [];
+      document.querySelectorAll('.l-tile').forEach(t => t.classList.remove('used'));
+      document.querySelectorAll('.a-slot').forEach(s => {
+        s.textContent = ''; s.classList.remove('filled');
+      });
+      document.getElementById('word-msg').textContent = 'not quite — try again.';
+      setTimeout(() => { document.getElementById('word-msg').textContent = ''; }, 1800);
+    }, 500);
+  }
 }
 
 function rewardCh1() {
