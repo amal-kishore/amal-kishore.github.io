@@ -831,8 +831,6 @@ body.second-read .mnote { opacity: .72; }
       "Some meetings are forgotten within days.<br>
       <em>Ours quietly stayed.</em>"
     </div>
-    <div class="fragment-badge" id="fb1">Fragment I</div>
-
     <!-- second-read note -->
     <div class="mnote" style="right:16px; top:18%; --r:3deg;">This is still my favourite photo of us.</div>
 
@@ -932,7 +930,6 @@ body.second-read .mnote { opacity: .72; }
   <div class="frags-row" id="frags-row">
     <div class="frag-chip" id="fc0"></div>
     <div class="frag-chip" id="fc1"></div>
-    <div class="frag-chip" id="fc2"></div>
   </div>
 
   <div class="assembly-box">
@@ -1102,7 +1099,6 @@ const CFG = {
      Three incomplete descriptions of her — they assemble in Ch4,
      with the missing fourth piece revealed by the heart.         */
   fragments: [
-    'the one I didn\'t plan on finding',
     'the one I would cross any mountain for',
     'the one I always come back to',
   ],
@@ -1431,7 +1427,6 @@ function rewardCh1() {
   const r = document.getElementById('r1');
   r.style.display = 'flex';
   buildPhotos('photos1', CFG.photos.ch1);
-  setTimeout(() => revealFragment('fb1', CFG.fragments[0]), 2200);
   STATE.done[0] = true;
 }
 
@@ -1632,7 +1627,7 @@ function initFragments() {
   STATE.done[3] = false; // reset guard
 
   /* reveal chips one by one */
-  ['fc0','fc1','fc2'].forEach((id, i) => {
+  ['fc0','fc1'].forEach((id, i) => {
     const el = document.getElementById(id);
     el.textContent = `"${CFG.fragments[i]}"`;
     setTimeout(() => el.classList.add('appear'), 500 + i * 700);
