@@ -1665,7 +1665,7 @@ function rewardCh2() {
   const r = document.getElementById('r2');
   r.style.display = 'flex';
   buildPhotos('photos2', CFG.photos.ch2);
-  setTimeout(() => revealFragment('fb2', CFG.fragments[1]), 2200);
+  setTimeout(() => revealFragment('fb2', CFG.fragments[0]), 2200);
   STATE.done[1] = true;
 }
 
@@ -1790,7 +1790,7 @@ function rewardCh3() {
   const r = document.getElementById('r3');
   r.style.display = 'flex';
   buildPhotos('photos3', CFG.photos.ch3);
-  setTimeout(() => revealFragment('fb3', CFG.fragments[2]), 2200);
+  setTimeout(() => revealFragment('fb3', CFG.fragments[1]), 2200);
   STATE.done[2] = true;
 }
 
@@ -1818,8 +1818,7 @@ function animateAssembly() {
   const txt = document.getElementById('assembly-text');
   txt.innerHTML = `
     You are <em style="color:var(--ink2);">"${CFG.fragments[0]}"</em>,<br>
-    <em style="color:var(--ink2);">"${CFG.fragments[1]}"</em>,<br>
-    <em style="color:var(--ink2);">"${CFG.fragments[2]}"</em>...<br>
+    <em style="color:var(--ink2);">"${CFG.fragments[1]}"</em>...<br>
     <span style="opacity:.35;">and&nbsp;&nbsp;&nbsp;___&nbsp;&nbsp;&nbsp;?</span>
   `;
   txt.style.opacity = '1';
@@ -1841,8 +1840,7 @@ function heartClick() {
   setTimeout(() => {
     box.innerHTML = `
       You are <em style="color:var(--ink2);">"${CFG.fragments[0]}"</em>,<br>
-      <em style="color:var(--ink2);">"${CFG.fragments[1]}"</em>,<br>
-      <em style="color:var(--ink2);">"${CFG.fragments[2]}"</em>...<br>
+      <em style="color:var(--ink2);">"${CFG.fragments[1]}"</em>...<br>
       <br>
       <span style="font-size:1.35em; color:#8b6914; letter-spacing:.05em;">प्रेम हो।</span>
     `;
