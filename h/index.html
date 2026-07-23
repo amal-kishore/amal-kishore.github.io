@@ -122,11 +122,10 @@ html, body {
   margin: 0 auto 36px;
 }
 .lt-body {
-  font-family: var(--body); font-size: clamp(1rem,2.2vw,1.12rem);
-  color: var(--ink); line-height: 1.95;
+  font-family: var(--serif); font-size: clamp(1.05rem,2.4vw,1.25rem);
+  color: var(--ink); line-height: 2.1; font-style: italic;
 }
-.lt-body p { margin-bottom: 1.45em; }
-.lt-body strong { font-family: var(--serif); font-style: italic; }
+.lt-body p { margin-bottom: 1.2em; }
 .lt-sign {
   font-family: var(--hand); font-size: 1.5rem;
   color: var(--ink); margin-top: 28px; display: block;
@@ -751,21 +750,12 @@ body.second-read .mnote { opacity: .72; }
 <div id="s0" class="screen">
   <div id="letter-card" class="parchment scroll-inner">
 
-    <div class="fade-el lt-to"  id="lt-to">For</div>
-    <div class="fade-el lt-name" id="lt-name">Dr. Harshita Seksaria</div>
+    <div class="fade-el lt-to" id="lt-to">To the one,</div>
     <div class="fade-el lt-rule" id="lt-rule"></div>
 
-    <div class="fade-el lt-body" id="lt-body">
-      <p>Dear Harshita,</p>
-      <p>Birthdays usually come with gifts.</p>
-      <p>This year, I wanted to give you something a little different.</p>
-      <p>For a long time, I have carried something within me. With every conversation, every laugh, every silence, and every memory we created together, it quietly grew into something more beautiful. Yet no matter how many times I tried, I could never find words that felt complete enough.</p>
-      <p>Some feelings cannot be wrapped as gifts, cannot be bought, and cannot be captured in a single letter.</p>
-      <p>So, instead of writing one ordinary message, I scattered little pieces of it along a journey.</p>
-      <p>As you walk through it, gathering each fragment, perhaps you'll discover what I have been trying to tell you all this time.</p>
-      <p>At the end of this path lies the answer to a question I have never truly answered—</p>
-      <p><strong>"What do you mean to me?"</strong></p>
-      <p>I hope you'll help me find the words.</p>
+    <div class="fade-el lt-body" id="lt-body" style="text-align:center;">
+      <p>jo nazdeek se nazdeek-tar aate gaye</p>
+      <p>Pahle dil, phir dil-ruba, phir dil ke mehman ho gaye</p>
     </div>
 
     <span class="fade-el lt-sign" id="lt-sign">— Amal</span>
@@ -1289,12 +1279,11 @@ document.getElementById('pass-input').addEventListener('keydown', e => {
 function animateLetter() {
   document.getElementById('letter-card').classList.add('open');
   [
-    ['lt-to',   800],
-    ['lt-name', 1400],
-    ['lt-rule', 1900],
-    ['lt-body', 2500],
-    ['lt-sign', 3400],
-    ['begin-btn', 4200],
+    ['lt-to',     800],
+    ['lt-rule',  1400],
+    ['lt-body',  2000],
+    ['lt-sign',  3200],
+    ['begin-btn', 4000],
   ].forEach(([id, d]) => {
     setTimeout(() => document.getElementById(id).classList.add('in'), d);
   });
