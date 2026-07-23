@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>The Unfinished Letter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Caveat:wght@400;600;700&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap" rel="stylesheet">
+<style>
+
+/* ─── RESET ──────────────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #09081a;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── TOKENS ─────────────────────────────────────────────── */
+:root {
+  --night:       #09081a;
+  --parchment:   #f5e9cc;
+  --parchment2:  #ede0b8;
+  --ink:         #261509;
+  --ink2:        #5a340f;
+  --gold:        #c9a84c;
+  --gold-glow:   rgba(201,168,76,.25);
+  --gold-faint:  rgba(201,168,76,.08);
+  --star:        rgba(255,245,210,.75);
+
+  --serif:   'Playfair Display', Georgia, serif;
+  --body:    'Crimson Text', Georgia, serif;
+  --hand:    'Caveat', cursive;
+  --hindi:   'Tiro Devanagari Hindi', Georgia, serif;
+}
+
+/* ─── STAR CANVAS ────────────────────────────────────────── */
+#stars {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 0;
+}
+
+/* ─── SCREENS ────────────────────────────────────────────── */
+.screen {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--night);
+  z-index: 10;
+  opacity: 0; pointer-events: none;
+  transition: opacity .7s ease;
+}
+.screen.visible { opacity: 1; pointer-events: all; }
+.screen.gone { display: none; }
+
+/* ─── PARCHMENT CARD ─────────────────────────────────────── */
+.parchment {
+  background: var(--parchment);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E");
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 1px rgba(139,105,20,.25),
+    0 20px 70px rgba(0,0,0,.55),
+    inset 0 0 120px rgba(160,120,40,.04);
+  position: relative;
+}
+.parchment::after {        /* dog-ear fold */
+  content: '';
+  position: absolute; bottom: 0; right: 0;
+  width: 36px; height: 36px;
+  background: linear-gradient(225deg, var(--night) 50%, var(--parchment2) 50%);
+}
+
+/* ─── SCROLLBAR (parchment screens) ─────────────────────── */
+.scroll-inner {
+  overflow-y: auto; overflow-x: hidden;
+  max-height: 82vh;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139,105,20,.3) transparent;
+}
+.scroll-inner::-webkit-scrollbar { width: 4px; }
+.scroll-inner::-webkit-scrollbar-thumb { background: rgba(139,105,20,.3); border-radius: 4px; }
+
+/* ═══════════════════════════════════════════════════════════
+   SCREEN 0 — OPENING LETTER
+═══════════════════════════════════════════════════════════ */
+#s0 { background: transparent; }
+
+#letter-card {
+  width: min(600px, 92vw);
+  padding: 56px 52px 48px;
+  transform: scale(.08) rotateX(35deg);
+  opacity: 0;
+  transition: transform 1.6s cubic-bezier(.34,1.56,.64,1), opacity 1s ease;
+}
+#letter-card.open {
+  transform: scale(1) rotateX(0deg);
+  opacity: 1;
+}
+/* left margin rule */
+#letter-card::before {
+  content: '';
+  position: absolute;
+  left: 68px; top: 0; bottom: 0; width: 1px;
+  background: rgba(180,100,80,.18);
+}
+
+.lt-to {
+  font-family: var(--serif); font-size: clamp(2rem,5vw,2.8rem);
+  color: var(--ink); text-align: center;
+  margin-bottom: 6px;
+}
+.lt-name {
+  font-family: var(--serif); font-size: clamp(.95rem,2.2vw,1.15rem);
+  color: var(--ink2); font-style: italic; text-align: center;
+  margin-bottom: 36px;
+}
+.lt-rule {
+  width: 44px; height: 1px;
+  background: var(--gold);
+  margin: 0 auto 36px;
+}
+.lt-body {
+  font-family: var(--body); font-size: clamp(1rem,2.2vw,1.12rem);
+  color: var(--ink); line-height: 1.95;
+}
+.lt-body p { margin-bottom: 1.45em; }
+.lt-body strong { font-family: var(--serif); font-style: italic; }
+.lt-sign {
+  font-family: var(--hand); font-size: 1.5rem;
+  color: var(--ink); margin-top: 28px; display: block;
+}
+
+.fade-el { opacity: 0; transition: opacity .9s ease; }
+.fade-el.in { opacity: 1; }
+
+#begin-btn {
+  display: block; margin: 36px auto 0;
+  padding: 13px 42px;
+  background: transparent; border: 1px solid var(--gold);
+  font-family: var(--serif); font-size: 1rem; font-style: italic;
+  color: var(--ink); letter-spacing: .06em; cursor: pointer;
+  transition: background .35s, box-shadow .35s, color .35s;
+}
+#begin-btn:hover {
+  background: var(--gold); color: var(--parchment);
+  box-shadow: 0 0 22px var(--gold-glow);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCREEN 1 — MAP
+═══════════════════════════════════════════════════════════ */
+#s1 { flex-direction: column; gap: 0; }
+
+.map-eyebrow {
+  font-family: var(--serif); font-size: .78rem;
+  color: rgba(201,168,76,.55); letter-spacing: .22em;
+  text-transform: uppercase; font-style: italic;
+  margin-bottom: 38px;
+}
+
+.story-path {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0;
+}
+.path-node { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+.path-icon {
+  width: 68px; height: 68px; border-radius: 50%;
+  border: 1.5px solid rgba(201,168,76,.22);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.9rem;
+  background: var(--gold-faint);
+  transition: all .4s ease; position: relative; z-index: 2;
+}
+.path-icon.lit {
+  border-color: var(--gold);
+  background: rgba(201,168,76,.14);
+  box-shadow: 0 0 22px var(--gold-glow), 0 0 50px rgba(201,168,76,.08);
+  animation: pulse 2.2s ease-in-out infinite;
+}
+.path-icon.done { border-color: var(--gold); opacity: .45; animation: none; }
+.path-icon.dark { opacity: .18; cursor: default; }
+
+.path-label {
+  font-family: var(--serif); font-size: .78rem; font-style: italic;
+  color: rgba(201,168,76,.5); margin-top: 7px; letter-spacing: .04em;
+  transition: color .3s;
+}
+.path-icon.lit ~ .path-label { color: var(--gold); }
+
+.path-line {
+  width: 1.5px; height: 38px;
+  background: linear-gradient(to bottom, rgba(201,168,76,.35), rgba(201,168,76,.05));
+}
+
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 22px var(--gold-glow), 0 0 50px rgba(201,168,76,.08); }
+  50%      { box-shadow: 0 0 34px rgba(201,168,76,.5), 0 0 70px rgba(201,168,76,.16); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHAPTER SCREENS (shared)
+═══════════════════════════════════════════════════════════ */
+.chapter-screen {
+  flex-direction: column;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 44px 20px 60px;
+  gap: 0;
+  align-items: center;
+}
+
+.ch-num {
+  font-family: var(--hand); font-size: 1rem;
+  color: var(--gold); letter-spacing: .16em; margin-bottom: 6px;
+}
+.ch-icon { font-size: 2.2rem; margin-bottom: 10px; }
+.ch-title {
+  font-family: var(--serif); font-size: clamp(1.8rem,4.5vw,2.6rem);
+  color: var(--parchment); line-height: 1.2; text-align: center;
+  margin-bottom: 6px;
+}
+.ch-sub {
+  font-family: var(--body); font-size: 1.05rem; font-style: italic;
+  color: rgba(245,233,204,.4); margin-bottom: 40px;
+}
+
+/* chapter-ink theme for ch4 */
+.ink-theme { background: #f9f4e8; }
+.ink-theme .ch-num  { color: #8b6914; }
+.ink-theme .ch-title { color: var(--ink); }
+.ink-theme .ch-sub   { color: rgba(38,21,9,.4); }
+
+.hint-text {
+  font-family: var(--body); font-size: 1rem; font-style: italic;
+  color: rgba(245,233,204,.38); text-align: center; margin-bottom: 24px;
+}
+
+/* reward block (hidden until puzzle solved) */
+.reward { display: none; flex-direction: column; align-items: center; gap: 0; }
+
+.photo-row {
+  display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+  margin-bottom: 28px;
+}
+.photo-tile {
+  width: 175px; height: 135px;
+  object-fit: cover; border-radius: 2px;
+  box-shadow: 0 4px 22px rgba(0,0,0,.5);
+  border: 1px solid rgba(201,168,76,.18);
+  opacity: 0; transform: translateY(18px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+.photo-tile.in { opacity: 1; transform: none; }
+
+.reward-quote {
+  font-family: var(--serif); font-size: 1.1rem; font-style: italic;
+  color: var(--parchment); text-align: center; line-height: 1.8;
+  max-width: 480px; margin-bottom: 30px;
+}
+.reward-quote em { color: var(--gold); font-style: normal; }
+
+.fragment-badge {
+  display: inline-block;
+  border: 1px solid rgba(201,168,76,.4);
+  background: var(--gold-faint);
+  border-radius: 3px; padding: 10px 22px;
+  font-family: var(--serif); font-size: 1rem; font-style: italic;
+  color: rgba(201,168,76,.3); letter-spacing: .04em;
+  filter: blur(5px);
+  transition: filter 1.1s ease, color .6s, border-color .6s;
+  margin-bottom: 32px;
+}
+.fragment-badge.clear {
+  filter: none; color: var(--gold);
+  border-color: rgba(201,168,76,.65);
+}
+
+.map-return {
+  padding: 12px 36px; background: transparent;
+  border: 1px solid rgba(201,168,76,.4);
+  font-family: var(--serif); font-size: .9rem; font-style: italic;
+  color: var(--gold); letter-spacing: .06em; cursor: pointer;
+  transition: background .35s, border-color .35s, box-shadow .35s;
+}
+.map-return:hover {
+  background: rgba(201,168,76,.08); border-color: var(--gold);
+  box-shadow: 0 0 16px var(--gold-glow);
+}
+
+/* ─── margin notes (second read only) ───────────────────── */
+.mnote {
+  font-family: var(--hand); font-size: .88rem; color: var(--ink2);
+  position: absolute; max-width: 130px; line-height: 1.45;
+  transform: rotate(var(--r, -2deg));
+  opacity: 0; pointer-events: none;
+  transition: opacity .7s ease;
+}
+.mnote::before { content: '* '; }
+body.second-read .mnote { opacity: .72; }
+
+/* ═══════════════════════════════════════════════════════════
+   CH1 — JIGSAW
+═══════════════════════════════════════════════════════════ */
+.puzzle-wrap {
+  display: flex; gap: 36px; justify-content: center;
+  align-items: flex-start; flex-wrap: wrap;
+  max-width: 860px; width: 100%;
+}
+
+.puzzle-board {
+  display: grid;
+  grid-template-columns: repeat(4, var(--ps, 80px));
+  grid-template-rows:    repeat(4, var(--ps, 80px));
+  gap: 2px;
+  background: rgba(201,168,76,.07);
+  border: 1px solid rgba(201,168,76,.18);
+  padding: 9px; border-radius: 3px;
+}
+.p-slot {
+  width: var(--ps, 80px); height: var(--ps, 80px);
+  border: 1px dashed rgba(201,168,76,.18); border-radius: 2px;
+  transition: border-color .2s, background .2s;
+}
+.p-slot.hover   { border-color: var(--gold); background: rgba(201,168,76,.08); }
+.p-slot.correct { border-style: solid; border-color: var(--gold); }
+
+.puzzle-tray {
+  display: grid;
+  grid-template-columns: repeat(4, var(--ps, 80px));
+  gap: 7px;
+}
+.p-piece {
+  width: var(--ps, 80px); height: var(--ps, 80px);
+  cursor: grab; border-radius: 2px;
+  border: 1px solid rgba(201,168,76,.18);
+  transition: transform .15s, box-shadow .15s;
+  user-select: none;
+  touch-action: none;
+}
+.p-piece:hover { transform: scale(1.06); box-shadow: 0 5px 18px rgba(0,0,0,.55); z-index: 50; }
+.p-piece.grabbing { opacity: .65; transform: scale(1.1); cursor: grabbing; box-shadow: 0 10px 28px rgba(0,0,0,.6); z-index: 200; }
+
+@media (max-width: 560px) {
+  .puzzle-board, .puzzle-tray { --ps: 62px; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CH2 — TIMELINE
+═══════════════════════════════════════════════════════════ */
+.timeline-wrap { max-width: 480px; width: 100%; }
+
+.tl-cards { display: flex; flex-direction: column; gap: 11px; margin-bottom: 26px; }
+
+.tl-card {
+  display: flex; align-items: center; gap: 15px;
+  background: rgba(245,233,204,.04);
+  border: 1px solid rgba(201,168,76,.18); border-radius: 3px;
+  padding: 18px 22px; cursor: grab; user-select: none;
+  transition: border-color .2s, background .2s;
+}
+.tl-card:hover { border-color: rgba(201,168,76,.4); background: rgba(245,233,204,.07); }
+.tl-card.dragging { opacity: .45; cursor: grabbing; }
+.tl-card.over { border-color: var(--gold); background: rgba(201,168,76,.1); }
+.tl-handle { color: rgba(201,168,76,.35); font-size: 1.2rem; }
+.tl-text {
+  font-family: var(--body); font-size: 1.05rem; font-style: italic;
+  color: var(--parchment);
+}
+.tl-emoji { font-size: 1.25rem; }
+
+.check-btn {
+  display: block; margin: 0 auto;
+  padding: 12px 34px; background: transparent;
+  border: 1px solid rgba(201,168,76,.4);
+  font-family: var(--serif); font-size: .92rem; font-style: italic;
+  color: var(--gold); cursor: pointer; letter-spacing: .05em;
+  transition: background .3s, border-color .3s;
+}
+.check-btn:hover { background: rgba(201,168,76,.07); border-color: var(--gold); }
+
+.tl-msg {
+  text-align: center; font-family: var(--body); font-style: italic;
+  font-size: .98rem; min-height: 1.6em; margin-top: 13px;
+  transition: color .3s;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CH3 — DIARY
+═══════════════════════════════════════════════════════════ */
+#diary-card {
+  width: min(540px, 92vw);
+  padding: 48px 52px;
+  color: var(--ink);
+}
+#diary-card::before {
+  content: '';
+  position: absolute;
+  left: 72px; top: 0; bottom: 0; width: 1px;
+  background: rgba(190,100,80,.22);
+}
+
+.diary-date {
+  font-family: var(--hand); font-size: .98rem;
+  color: var(--ink2); opacity: .65;
+  margin-bottom: 22px; padding-left: 12px;
+}
+
+.diary-lines {
+  background-image: repeating-linear-gradient(
+    transparent, transparent 30px,
+    rgba(180,155,115,.18) 30px, rgba(180,155,115,.18) 31px
+  );
+  padding: 4px 0;
+}
+.diary-p {
+  font-family: var(--body); font-size: 1.05rem;
+  color: var(--ink); line-height: 31px;
+  padding-left: 12px; margin-bottom: 8px;
+}
+.d-input {
+  background: transparent; border: none;
+  border-bottom: 1px solid rgba(90,52,15,.3);
+  font-family: var(--hand); font-size: 1.05rem;
+  color: var(--ink); width: 120px; text-align: center;
+  outline: none; padding: 0 3px;
+  transition: border-color .3s, color .3s;
+}
+.d-input:focus { border-bottom-color: var(--ink2); }
+.d-input.ok    { border-bottom-color: #4a7a4a; color: #2a4a2a; }
+.d-input.wrong { border-bottom-color: #a04020; }
+
+.diary-submit {
+  display: block; margin: 28px auto 0;
+  padding: 10px 32px; background: transparent;
+  border: 1px solid rgba(90,52,15,.35);
+  font-family: var(--serif); font-size: .9rem; font-style: italic;
+  color: var(--ink2); cursor: pointer;
+  transition: background .3s, border-color .3s;
+}
+.diary-submit:hover { background: rgba(90,52,15,.06); border-color: var(--ink2); }
+.diary-msg {
+  text-align: center; font-family: var(--hand);
+  font-size: 1rem; color: var(--ink2);
+  min-height: 1.6em; margin-top: 12px; font-style: italic;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CH4 — FRAGMENT ASSEMBLY
+═══════════════════════════════════════════════════════════ */
+#s4 .chapter-screen { justify-content: center; }
+
+.frags-row {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  justify-content: center; margin-bottom: 40px;
+}
+.frag-chip {
+  border: 1px solid rgba(201,168,76,.4);
+  background: var(--gold-faint); border-radius: 3px;
+  padding: 10px 18px;
+  font-family: var(--serif); font-size: .98rem; font-style: italic;
+  color: var(--ink2); letter-spacing: .04em;
+  opacity: 0; transform: scale(.8);
+  filter: blur(8px);
+  transition: opacity .8s ease, transform .8s cubic-bezier(.34,1.56,.64,1), filter .8s ease;
+}
+.frag-chip.appear { opacity: 1; transform: scale(1); filter: none; }
+
+.assembly-box {
+  border: 1px dashed rgba(38,21,9,.2); border-radius: 4px;
+  min-width: 360px; min-height: 100px; max-width: 580px; width: 100%;
+  padding: 24px 28px; display: flex; align-items: center;
+  justify-content: center; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 32px;
+}
+.assembly-text {
+  font-family: var(--serif); font-size: 1.2rem; font-style: italic;
+  color: var(--ink); line-height: 2; text-align: center;
+  opacity: 0; transition: opacity 1s ease;
+}
+
+.missing-hint {
+  font-family: var(--serif); font-size: 1.05rem; font-style: italic;
+  color: var(--ink); text-align: center; line-height: 1.8;
+  opacity: 0; transition: opacity .9s ease; margin-bottom: 24px;
+}
+.missing-hint small { font-size: .85em; opacity: .55; display: block; margin-top: 4px; }
+
+.heart-pulse {
+  font-size: 3.2rem; cursor: pointer; display: block;
+  background: none; border: none;
+  opacity: 0; transition: opacity .9s ease;
+  animation: hb 1.8s ease-in-out infinite;
+}
+@keyframes hb {
+  0%,100%{ transform: scale(1); }
+  14%    { transform: scale(1.12); }
+  28%    { transform: scale(1); }
+  42%    { transform: scale(1.12); }
+  70%    { transform: scale(1); }
+}
+
+.ready-btn {
+  padding: 14px 52px; background: transparent;
+  border: 1px solid var(--ink2);
+  font-family: var(--serif); font-size: 1.05rem; font-style: italic;
+  color: var(--ink); cursor: pointer; letter-spacing: .06em;
+  opacity: 0; transition: opacity .9s ease, background .3s;
+  display: none;
+}
+.ready-btn.show { display: block; }
+.ready-btn:hover { background: rgba(38,21,9,.05); }
+
+/* ═══════════════════════════════════════════════════════════
+   POEM SCREEN
+═══════════════════════════════════════════════════════════ */
+#s5 {
+  flex-direction: column;
+  overflow-y: auto; padding: 70px 20px 80px;
+  gap: 0; align-items: center;
+  background: var(--night);
+}
+
+.poem-q {
+  font-family: var(--hindi); font-size: clamp(1.1rem,3vw,1.5rem);
+  color: rgba(245,233,204,.28);
+  text-align: center; letter-spacing: .02em;
+  margin-bottom: 64px;
+  opacity: 0; transition: opacity 1.2s ease;
+}
+
+.poem-body { max-width: 560px; width: 100%; text-align: center; }
+
+.stanza {
+  margin-bottom: 52px;
+  opacity: 0; transform: translateY(22px);
+  transition: opacity 1.4s ease, transform 1.4s ease;
+}
+.stanza.in { opacity: 1; transform: none; }
+.stanza p {
+  font-family: var(--hindi); font-size: clamp(1.05rem,2.6vw,1.28rem);
+  color: var(--parchment); line-height: 2.3;
+}
+
+.poem-final {
+  font-family: var(--hindi); font-size: clamp(1.4rem,4vw,2rem);
+  color: var(--gold); text-align: center;
+  margin-top: 30px; line-height: 2.2;
+  opacity: 0; transition: opacity 1.8s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BIRTHDAY SCREEN
+═══════════════════════════════════════════════════════════ */
+#s6 {
+  overflow: hidden;
+  background: var(--night);
+}
+
+.gallery-field { position: relative; width: 100%; height: 100%; }
+
+.float-photo {
+  position: absolute; border-radius: 3px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.65);
+  border: 2px solid rgba(255,255,255,.12);
+  object-fit: cover;
+  opacity: 0;
+  animation: floatIn .9s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+@keyframes floatIn {
+  from { transform: scale(.25) rotate(var(--r,0deg)); opacity: 0; }
+  to   { transform: scale(1) rotate(var(--r,0deg));   opacity: 1; }
+}
+
+.gallery-cta {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+  z-index: 100;
+  opacity: 0; transition: opacity .8s ease;
+  text-align: center;
+}
+.gallery-cta.in { opacity: 1; }
+.gallery-cta button {
+  padding: 12px 38px; background: rgba(9,8,26,.7);
+  border: 1px solid rgba(255,255,255,.3);
+  color: rgba(245,233,204,.9); font-family: var(--serif);
+  font-size: .92rem; font-style: italic; cursor: pointer;
+  letter-spacing: .05em; backdrop-filter: blur(6px);
+  transition: border-color .3s, background .3s;
+}
+.gallery-cta button:hover { border-color: var(--gold); background: rgba(9,8,26,.85); }
+
+/* video overlay */
+#vid-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(9,8,26,.88); z-index: 300;
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 20px;
+}
+#vid-overlay.open { display: flex; }
+#vid-overlay video {
+  max-width: 90vw; max-height: 68vh;
+  border-radius: 4px; box-shadow: 0 10px 50px rgba(0,0,0,.7);
+}
+#vid-overlay button {
+  padding: 10px 32px; background: transparent;
+  border: 1px solid rgba(245,233,204,.3);
+  color: rgba(245,233,204,.7); font-family: var(--serif);
+  font-size: .88rem; font-style: italic; cursor: pointer;
+  transition: border-color .3s, color .3s;
+}
+#vid-overlay button:hover { border-color: rgba(245,233,204,.7); color: rgba(245,233,204,1); }
+
+/* ═══════════════════════════════════════════════════════════
+   FINAL LETTER SCREEN
+═══════════════════════════════════════════════════════════ */
+#s7 { overflow-y: auto; padding: 50px 20px 60px; }
+
+#final-card {
+  width: min(520px, 92vw);
+  padding: 58px 52px;
+}
+
+.final-body {
+  font-family: var(--serif); font-size: 1.08rem; font-style: italic;
+  color: var(--ink); line-height: 2; text-align: center;
+  margin-bottom: 36px;
+  opacity: 0; transition: opacity 1.1s ease;
+}
+.final-body.in { opacity: 1; }
+.final-body p { margin-bottom: .6em; }
+
+.final-sign {
+  font-family: var(--hand); font-size: 1.8rem;
+  color: var(--ink); text-align: center;
+  opacity: 0; transition: opacity 1.1s ease;
+}
+.final-sign.in { opacity: 1; }
+
+.again-btn {
+  display: none; margin: 48px auto 0;
+  padding: 13px 40px; background: transparent;
+  border: 1px solid rgba(201,168,76,.35);
+  font-family: var(--serif); font-size: .88rem; font-style: italic;
+  color: var(--gold); letter-spacing: .1em; cursor: pointer;
+  transition: border-color .3s, box-shadow .3s, background .3s;
+}
+.again-btn:hover {
+  border-color: var(--gold); background: rgba(201,168,76,.06);
+  box-shadow: 0 0 22px var(--gold-glow);
+}
+
+/* ─── CONFETTI ───────────────────────────────────────────── */
+.conf {
+  position: fixed; top: -10px; pointer-events: none;
+  border-radius: 2px; z-index: 500;
+  animation: confFall linear forwards;
+}
+@keyframes confFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(680deg); opacity: 0; }
+}
+
+/* ─── PASSWORD SCREEN ────────────────────────────────────── */
+#pass-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(201,168,76,.35);
+  outline: none;
+  font-family: var(--hand);
+  font-size: 1.6rem;
+  color: var(--parchment);
+  text-align: center;
+  letter-spacing: .3em;
+  width: min(240px, 70vw);
+  padding: 8px 0;
+  caret-color: var(--gold);
+  transition: border-color .4s;
+}
+#pass-input::placeholder {
+  color: rgba(201,168,76,.2);
+  letter-spacing: .4em;
+}
+#pass-input:focus { border-bottom-color: var(--gold); }
+
+#pass-error {
+  font-family: var(--serif); font-size: .85rem; font-style: italic;
+  color: rgba(201,168,76,.5); margin-top: 18px; min-height: 1.4em;
+  letter-spacing: .05em;
+  transition: opacity .4s;
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-5px); }
+  80%      { transform: translateX(5px); }
+}
+.shake { animation: shake .4s ease; }
+
+/* ─── INIT OVERLAY ───────────────────────────────────────── */
+#curtain {
+  position: fixed; inset: 0;
+  background: var(--night); z-index: 999;
+  transition: opacity 1.4s ease;
+}
+
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div id="curtain"></div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCREEN — PASSWORD
+════════════════════════════════════════════════════════ -->
+<div id="s-pass" class="screen" style="background:transparent; flex-direction:column; gap:0;">
+  <input id="pass-input" type="password"
+    autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+    placeholder="·  ·  ·">
+  <div id="pass-error"></div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCREEN 0 — OPENING LETTER
+════════════════════════════════════════════════════════ -->
+<div id="s0" class="screen">
+  <div id="letter-card" class="parchment scroll-inner">
+
+    <div class="fade-el lt-to"  id="lt-to">For</div>
+    <div class="fade-el lt-name" id="lt-name">Dr. Harshita Seksaria</div>
+    <div class="fade-el lt-rule" id="lt-rule"></div>
+
+    <div class="fade-el lt-body" id="lt-body">
+      <p>Dear Harshita,</p>
+      <p>Birthdays usually come with gifts.</p>
+      <p>This year, I wanted to give you something a little different.</p>
+      <p>For a long time, I have carried something within me. With every conversation, every laugh, every silence, and every memory we created together, it quietly grew into something more beautiful. Yet no matter how many times I tried, I could never find words that felt complete enough.</p>
+      <p>Some feelings cannot be wrapped as gifts, cannot be bought, and cannot be captured in a single letter.</p>
+      <p>So, instead of writing one ordinary message, I scattered little pieces of it along a journey.</p>
+      <p>As you walk through it, gathering each fragment, perhaps you'll discover what I have been trying to tell you all this time.</p>
+      <p>At the end of this path lies the answer to a question I have never truly answered—</p>
+      <p><strong>"What do you mean to me?"</strong></p>
+      <p>I hope you'll help me find the words.</p>
+    </div>
+
+    <span class="fade-el lt-sign" id="lt-sign">— Amal</span>
+    <button class="fade-el" id="begin-btn">Begin the Journey</button>
+
+    <!-- second-read margin notes -->
+    <div class="mnote" style="right:-148px; top:32%; --r:-3deg;">I wrote this seven times before this version.</div>
+    <div class="mnote" style="left:-136px; top:58%; --r:2deg;">I was so nervous you'd find it before your birthday.</div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCREEN 1 — MAP
+════════════════════════════════════════════════════════ -->
+<div id="s1" class="screen gone">
+  <div class="map-eyebrow">A Map of Our Story</div>
+
+  <div class="story-path">
+    <div class="path-node" id="node0" onclick="enterChapter(0)">
+      <div class="path-icon" id="pi0">🌸</div>
+      <div class="path-label">The First Bloom</div>
+    </div>
+    <div class="path-line"></div>
+    <div class="path-node" id="node1" onclick="enterChapter(1)">
+      <div class="path-icon" id="pi1">🧭</div>
+      <div class="path-label">The Forgotten Path</div>
+    </div>
+    <div class="path-line"></div>
+    <div class="path-node" id="node2" onclick="enterChapter(2)">
+      <div class="path-icon" id="pi2">📖</div>
+      <div class="path-label">Keeper of Memories</div>
+    </div>
+    <div class="path-line"></div>
+    <div class="path-node" id="node3" onclick="enterChapter(3)">
+      <div class="path-icon" id="pi3">🖋</div>
+      <div class="path-label">The Missing Words</div>
+    </div>
+    <div class="path-line"></div>
+    <div class="path-node" id="node4" onclick="enterChapter(4)">
+      <div class="path-icon" id="pi4">❤️</div>
+      <div class="path-label">The Unfinished Letter</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCREEN 2 — CHAPTER 1 : First Bloom
+════════════════════════════════════════════════════════ -->
+<div id="s2" class="screen chapter-screen gone">
+
+  <div class="ch-num">Chapter I</div>
+  <div class="ch-icon">🌸</div>
+  <div class="ch-title">The First Bloom</div>
+  <div class="ch-sub">How everything began.</div>
+
+  <!-- PUZZLE -->
+  <div id="ch1-puzzle">
+    <div class="hint-text">Piece it back together — the way it all began.</div>
+    <div class="puzzle-wrap">
+      <div class="puzzle-board" id="pb"></div>
+      <div class="puzzle-tray"  id="pt"></div>
+    </div>
+  </div>
+
+  <!-- REWARD -->
+  <div class="reward" id="r1">
+    <div class="photo-row" id="photos1"></div>
+    <div class="reward-quote">
+      "Some meetings are forgotten within days.<br>
+      <em>Ours quietly stayed.</em>"
+    </div>
+    <div class="fragment-badge" id="fb1">Fragment I</div>
+
+    <!-- second-read note -->
+    <div class="mnote" style="right:16px; top:18%; --r:3deg;">This is still my favourite photo of us.</div>
+
+    <button class="map-return" onclick="goMap()">Return to the Map →</button>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCREEN 3 — CHAPTER 2 : Forgotten Path
+════════════════════════════════════════════════════════ -->
+<div id="s3" class="screen chapter-screen gone">
+
+  <div class="ch-num">Chapter II</div>
+  <div class="ch-icon">🧭</div>
+  <div class="ch-title">The Forgotten Path</div>
+  <div class="ch-sub">Adventures. Travel. Laughter.</div>
+
+  <!-- PUZZLE -->
+  <div id="ch2-puzzle">
+    <div class="hint-text">Arrange these memories in the order they happened.</div>
+    <div class="timeline-wrap">
+      <div class="tl-cards" id="tl-cards"></div>
+      <button class="check-btn" onclick="checkTimeline()">That's the order →</button>
+      <div class="tl-msg" id="tl-msg"></div>
+    </div>
+  </div>
+
+  <!-- REWARD -->
+  <div class="reward" id="r2">
+    <div class="photo-row" id="photos2"></div>
+    <div class="reward-quote">
+      "We were not always going somewhere.<br>
+      <em>Sometimes, we were just together.</em>"
+    </div>
+    <div class="fragment-badge" id="fb2">Fragment II</div>
+
+    <div class="mnote" style="left:14px; top:22%; --r:-2deg;">You laughed for five minutes after this happened.</div>
+
+    <button class="map-return" onclick="goMap()">Return to the Map →</button>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCREEN 4 — CHAPTER 3 : Keeper of Memories
+════════════════════════════════════════════════════════ -->
+<div id="s4" class="screen chapter-screen gone">
+
+  <div class="ch-num">Chapter III</div>
+  <div class="ch-icon">📖</div>
+  <div class="ch-title">Keeper of Memories</div>
+  <div class="ch-sub">Things that live only in our hearts.</div>
+
+  <!-- PUZZLE -->
+  <div id="ch3-puzzle">
+    <div class="hint-text">The diary remembers. Do you?</div>
+    <div id="diary-card" class="parchment scroll-inner">
+      <div class="diary-date">Personal Diary — Pages We Wrote Together</div>
+      <div class="diary-lines">
+        <p class="diary-p">Our song — the one I could never quite bring myself to say aloud:
+          <input class="d-input" id="d-movie" placeholder="..." autocomplete="off" style="width:160px">.</p>
+        <br>
+        <p class="diary-p">What she always asks for when we're wandering the streets:
+          <input class="d-input" id="d-cafe" placeholder="..." autocomplete="off" style="width:140px">.</p>
+        <br>
+        <p class="diary-p">What I call her when no one else is listening:
+          <input class="d-input" id="d-nick" placeholder="..." autocomplete="off">.</p>
+        <br>
+        <p class="diary-p">And her most dangerous weakness:
+          <input class="d-input" id="d-sweet" placeholder="..." autocomplete="off" style="width:120px">.</p>
+      </div>
+      <button class="diary-submit" onclick="checkDiary()">The ink remembers →</button>
+      <div class="diary-msg" id="diary-msg"></div>
+
+      <div class="mnote" style="right:-20px; top:42%; --r:4deg;">I was nervous you'd forget the café name.</div>
+    </div>
+  </div>
+
+  <!-- REWARD -->
+  <div class="reward" id="r3" style="margin-top:32px;">
+    <div class="photo-row" id="photos3"></div>
+    <div class="reward-quote">
+      "We never needed much.<br>
+      <em>Only each other, and a quiet place.</em>"
+    </div>
+    <div class="fragment-badge" id="fb3">Fragment III</div>
+
+    <button class="map-return" onclick="goMap()">Return to the Map →</button>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCREEN 5 — CHAPTER 4 : Missing Words
+════════════════════════════════════════════════════════ -->
+<div id="s5" class="screen chapter-screen ink-theme gone">
+
+  <div class="ch-num" style="color:#8b6914;">Chapter IV</div>
+  <div class="ch-icon">🖋</div>
+  <div class="ch-title" style="color:var(--ink);">The Missing Words</div>
+  <div class="ch-sub" style="color:rgba(38,21,9,.4);">Three fragments. One truth. One piece still missing.</div>
+
+  <div class="frags-row" id="frags-row">
+    <div class="frag-chip" id="fc0"></div>
+    <div class="frag-chip" id="fc1"></div>
+    <div class="frag-chip" id="fc2"></div>
+  </div>
+
+  <div class="assembly-box">
+    <div class="assembly-text" id="assembly-text"></div>
+  </div>
+
+  <div class="missing-hint" id="missing-hint">
+    There is still one piece missing.
+    <small>Perhaps the heart knows it.</small>
+  </div>
+
+  <button class="heart-pulse" id="heart-btn" onclick="heartClick()">❤️</button>
+
+  <button class="ready-btn" id="ready-btn" onclick="goPoem()">I'm ready.</button>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCREEN 6 — POEM
+════════════════════════════════════════════════════════ -->
+<div id="s6" class="screen gone" style="flex-direction:column; overflow-y:auto; padding:70px 20px 90px; align-items:center; gap:0;">
+  <div class="poem-q" id="poem-q">क्या तुम जानते हो, तुम मेरे लिए क्या हो?</div>
+  <div class="poem-body" id="poem-body"></div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCREEN 7 — BIRTHDAY GALLERY
+════════════════════════════════════════════════════════ -->
+<div id="s7" class="screen gone">
+  <div class="gallery-field" id="gallery"></div>
+
+  <div class="gallery-cta" id="gallery-cta">
+    <button onclick="openVideo()">One more thing →</button>
+  </div>
+
+  <!-- video overlay -->
+  <div id="vid-overlay">
+    <video id="vid" controls>
+      <source src="photos/VID20250222173033.mp4" type="video/mp4">
+    </video>
+    <button onclick="skipToFinal()">Continue →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCREEN 8 — FINAL LETTER
+════════════════════════════════════════════════════════ -->
+<div id="s8" class="screen gone">
+  <div id="final-card" class="parchment scroll-inner">
+
+    <div class="final-body" id="final-body">
+      <p>Happy Birthday,</p>
+      <p>Dr. Harshita Seksaria.</p>
+      <br>
+      <p>Thank you for becoming<br>the most beautiful chapter<br>of my life.</p>
+      <br>
+      <p>The letter is finally complete.</p>
+      <br>
+      <p>But our story isn't.</p>
+    </div>
+
+    <div class="final-sign" id="final-sign">Love,<br>Amal</div>
+
+    <button class="again-btn" id="again-btn" onclick="readAgain()">Read it again.</button>
+
+    <!-- second-read margin notes -->
+    <div class="mnote" style="left:-154px; top:28%; --r:-2deg;">This is the 8th version of this letter.</div>
+    <div class="mnote" style="right:-140px; top:62%; --r:3deg;">And it is still incomplete. Some things always will be.</div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════ -->
+<script>
+
+/* ─────────────────────────────────────────────────────────
+   ★  FILL THESE IN BEFORE DEPLOYING  ★
+───────────────────────────────────────────────────────── */
+const CFG = {
+
+  /* Chapter 3 — diary answers (case-insensitive, trimmed).
+     Each key can hold multiple accepted spellings.          */
+  diary: {
+    movie:    ['Agar Main Kahoon', 'agar main kahoon', 'agar main kahu',
+               'agar mai kahoon', 'agar mai kahu', 'agar mai kahun'],
+    cafe:     ['kadi kachori', 'kadi-kachori', 'kadhi kachori',
+               'kadhi-kachori', 'kadi kachouri'],
+    nickname: ['khargosh', 'Khargosh', 'bunbun', 'bun bun', 'BunBun'],
+    dessert:  ['ghewar', 'Ghewar', 'ghevар', 'ghevra'],
+  },
+
+  /* Chapter 2 — memories in chronological order.
+     Cards are shuffled on screen; she drags them back to this order. */
+  memories: [
+    { text: 'The evening we first wandered to Sukna Lake',  emoji: '🌊' },
+    { text: 'The Kareri Lake trek',                         emoji: '⛰️' },
+    { text: 'Those evenings in Udaipur',                    emoji: '🏰' },
+    { text: 'Our engagement in Rajasthan',                  emoji: '💍' },
+  ],
+  timelineOrder: [0, 1, 2, 3],  // already chronological — shuffle handles display
+
+  /* Chapter 1 — jigsaw uses this photo */
+  jigsawPhoto: 'photos/IMG_20220616_221540.jpg',
+
+  /* Photos per chapter  */
+  photos: {
+    ch1: [
+      'photos/us/Screenshot_20221218_130543.jpg',  // Dec 2022
+      'photos/IMG_20220616_221540.jpg',
+      'photos/us/IMG_20230314_221235.jpg',          // Mar 2023
+      'photos/IMG_20230401_181555.jpg',
+      'photos/us/IMG_20230527_142849.jpg',          // May 2023
+      'photos/IMG_20230408_160535.jpg',
+    ],
+    ch2: [
+      'photos/IMG20230624133948.jpg',
+      'photos/IMG20240724000155.jpg',
+      'photos/IMG20240724000200.jpg',
+      'photos/IMG20240904215033.jpg',
+      'photos/us/IMG20240928195335.jpg',            // Sep 2024
+      'photos/IMG20241007182920.jpg',
+    ],
+    ch3: [
+      'photos/IMG20241010203103.jpg',
+      'photos/IMG20241011072014.jpg',
+      'photos/IMG20241011175410.jpg',
+      'photos/IMG20241011180250.jpg',
+      'photos/IMG20241012070301.jpg',
+      'photos/IMG20250222160512.jpg',
+      'photos/us/IMG20250222142349.jpg',            // Feb 2025
+      'photos/IMG20250222165804.jpg',
+      'photos/IMG20251116190018.jpg',
+    ],
+    all: [
+      'photos/us/Screenshot_20221218_130543.jpg',
+      'photos/IMG_20220616_221540.jpg',
+      'photos/IMG_20230401_181555.jpg',
+      'photos/IMG_20230408_160535.jpg',
+      'photos/IMG_20230408_183339.jpg',
+      'photos/us/IMG_20230314_221235.jpg',
+      'photos/us/IMG_20230527_142849.jpg',
+      'photos/IMG20230624133948.jpg',
+      'photos/IMG20240724000155.jpg',
+      'photos/IMG20240724000200.jpg',
+      'photos/IMG20240904215033.jpg',
+      'photos/us/IMG20240928195335.jpg',
+      'photos/IMG20241007182920.jpg',
+      'photos/IMG20241010203103.jpg',
+      'photos/IMG20241011072014.jpg',
+      'photos/IMG20241011175410.jpg',
+      'photos/IMG20241011180250.jpg',
+      'photos/IMG20241012070301.jpg',
+      'photos/IMG20250222160512.jpg',
+      'photos/us/IMG20250222142349.jpg',
+      'photos/IMG20250222165804.jpg',
+      'photos/IMG20251116190018.jpg',
+      'photos/IMG20260508131547.jpg',
+      'photos/IMG20260509202116.jpg',
+      'photos/IMG20260511000821.jpg',
+      'photos/us/IMG20260508131557.jpg',            // engagement — last two
+      'photos/us/IMG20260509212211.jpg',
+    ],
+  },
+
+  /* Fragment text revealed in Ch1, Ch2, Ch3.
+     Three incomplete descriptions of her — they assemble in Ch4,
+     with the missing fourth piece revealed by the heart.         */
+  fragments: [
+    'the one I didn\'t plan on finding',
+    'the one I would cross any mountain for',
+    'the one I always come back to',
+  ],
+
+  poem: [
+    `<p>तुम एक सुंदर कविता हो,<br>
+     काले घिरे बादलों के बीच उम्मीद हो,<br>
+     उलझे वक्त की सुलझ हो,<br>
+     थकान का विश्राम हो।</p>`,
+
+    `<p>मुझे फूल पसंद हैं और तुम बागवान हो,<br>
+     'चलो दो कदम और' वाली प्रेरणा हो,<br>
+     तुम स्पष्टता हो,<br>
+     कुरीतियाँ छोड़ दूँ, वैसा इनाम हो।</p>`,
+  ],
+
+  poemEnding: `तुम एक उत्सव हो, सदाबहार हो,<br><br>और तुम.... प्रेम हो।`,
+
+  /* Second-read margin notes.
+     id = element id from HTML, add more if you like.       */
+  marginNotes: {
+    /* Already placed in HTML — just change the text inside .mnote elements */
+  },
+};
+
+/* ─────────────────────────────────────────────────────────
+   STATE
+───────────────────────────────────────────────────────── */
+const STATE = {
+  done: [false, false, false, false],    // chapters 0-3 completed
+  isSecondRead: localStorage.getItem('hl_sr') === '1',
+};
+
+/* ─────────────────────────────────────────────────────────
+   STARS
+───────────────────────────────────────────────────────── */
+(function () {
+  const cv = document.getElementById('stars');
+  const cx = cv.getContext('2d');
+
+  function resize() { cv.width = innerWidth; cv.height = innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  const N = 220;
+  const stars = Array.from({ length: N }, () => ({
+    x: Math.random() * innerWidth,
+    y: Math.random() * innerHeight,
+    r: Math.random() * 1.4 + .3,
+    a: Math.random(),
+    da: (Math.random() - .5) * .003,
+    vy: Math.random() * .04 + .01,
+  }));
+
+  (function draw() {
+    cx.clearRect(0, 0, cv.width, cv.height);
+    stars.forEach(s => {
+      s.a += s.da;
+      if (s.a < 0 || s.a > 1) s.da *= -1;
+      s.y += s.vy;
+      if (s.y > cv.height) s.y = 0;
+      cx.beginPath();
+      cx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      cx.fillStyle = `rgba(255,242,200,${s.a * .65})`;
+      cx.fill();
+    });
+    requestAnimationFrame(draw);
+  })();
+})();
+
+/* ─────────────────────────────────────────────────────────
+   AMBIENT AUDIO (Web Audio API — A-minor chord pad)
+───────────────────────────────────────────────────────── */
+let audioCtx, masterGain;
+
+function startAudio() {
+  if (audioCtx) return;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+    masterGain.gain.linearRampToValueAtTime(.055, audioCtx.currentTime + 5);
+    masterGain.connect(audioCtx.destination);
+
+    [110, 164.81, 220, 261.63, 329.63].forEach((f, i) => {
+      [f, f * 1.0025].forEach(freq => {
+        const osc = audioCtx.createOscillator();
+        const g   = audioCtx.createGain();
+        const lfo = audioCtx.createOscillator();
+        const lg  = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        g.gain.value = .28 / 5;
+
+        lfo.type = 'sine';
+        lfo.frequency.value = .04 + i * .018;
+        lg.gain.value = freq * .0018;
+
+        lfo.connect(lg); lg.connect(osc.frequency);
+        osc.connect(g);  g.connect(masterGain);
+        osc.start(); lfo.start();
+      });
+    });
+  } catch(e) { /* silent fallback */ }
+}
+
+/* ─────────────────────────────────────────────────────────
+   SCREEN MANAGER
+───────────────────────────────────────────────────────── */
+let currentScreen = 's-pass';
+
+function show(id) {
+  const prev = document.getElementById(currentScreen);
+  if (prev) { prev.classList.remove('visible'); }
+  currentScreen = id;
+  const next = document.getElementById(id);
+  next.classList.remove('gone');
+  requestAnimationFrame(() => requestAnimationFrame(() => next.classList.add('visible')));
+  if (prev) setTimeout(() => prev.classList.add('gone'), 750);
+}
+
+function fade(el, delay = 0) {
+  setTimeout(() => el.classList.add('in'), delay);
+}
+
+/* ─────────────────────────────────────────────────────────
+   BOOT
+───────────────────────────────────────────────────────── */
+window.addEventListener('load', () => {
+  if (STATE.isSecondRead) document.body.classList.add('second-read');
+
+  /* fade out curtain */
+  setTimeout(() => {
+    const c = document.getElementById('curtain');
+    c.style.opacity = '0';
+    setTimeout(() => c.remove(), 1500);
+  }, 300);
+
+  /* show password screen first */
+  const sp = document.getElementById('s-pass');
+  sp.classList.remove('gone');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    sp.classList.add('visible');
+    setTimeout(() => document.getElementById('pass-input').focus(), 600);
+  }));
+});
+
+/* ─── PASSWORD CHECK ─────────────────────────────────────── */
+document.getElementById('pass-input').addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const val = e.target.value.trim().toLowerCase();
+  if (val === 'rabbit') {
+    const sp = document.getElementById('s-pass');
+    sp.classList.remove('visible');
+    setTimeout(() => {
+      sp.classList.add('gone');
+      /* now show opening letter */
+      const s0 = document.getElementById('s0');
+      s0.classList.remove('gone');
+      currentScreen = 's0';
+      requestAnimationFrame(() => requestAnimationFrame(() => s0.classList.add('visible')));
+      setTimeout(animateLetter, 600);
+    }, 700);
+  } else {
+    const inp = document.getElementById('pass-input');
+    const err = document.getElementById('pass-error');
+    inp.classList.add('shake');
+    inp.value = '';
+    err.textContent = 'try again.';
+    setTimeout(() => { inp.classList.remove('shake'); err.textContent = ''; }, 1200);
+  }
+});
+
+function animateLetter() {
+  document.getElementById('letter-card').classList.add('open');
+  [
+    ['lt-to',   800],
+    ['lt-name', 1400],
+    ['lt-rule', 1900],
+    ['lt-body', 2500],
+    ['lt-sign', 3400],
+    ['begin-btn', 4200],
+  ].forEach(([id, d]) => {
+    setTimeout(() => document.getElementById(id).classList.add('in'), d);
+  });
+}
+
+/* ─────────────────────────────────────────────────────────
+   BEGIN JOURNEY
+───────────────────────────────────────────────────────── */
+document.getElementById('begin-btn').addEventListener('click', () => {
+  startAudio();
+  const card = document.getElementById('letter-card');
+  card.style.transition = 'transform .75s ease, opacity .6s ease';
+  card.style.transform  = 'scale(.92) rotateX(-12deg)';
+  card.style.opacity    = '0';
+  setTimeout(goMap, 800);
+});
+
+/* ─────────────────────────────────────────────────────────
+   MAP
+───────────────────────────────────────────────────────── */
+function goMap() {
+  show('s1');
+  updateMap();
+}
+
+function updateMap() {
+  const icons = ['pi0','pi1','pi2','pi3','pi4'];
+  icons.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.className = 'path-icon';
+    if (i === 4) {
+      if (STATE.done.every(Boolean)) el.classList.add('lit');
+      else el.classList.add('dark');
+      return;
+    }
+    if (STATE.done[i])               el.classList.add('done');
+    else if (i === 0 || STATE.done[i-1]) el.classList.add('lit');
+    else                              el.classList.add('dark');
+  });
+}
+
+function enterChapter(idx) {
+  if (idx < 4 && idx > 0 && !STATE.done[idx - 1]) return;
+  if (idx === 4 && !STATE.done.every(Boolean)) return;
+
+  const screens = ['s2','s3','s4','s5','s6'];  // ch0→s2, ..., final→s6
+  if (idx === 4) { goPoem(); return; }
+
+  show(screens[idx]);
+  if (idx === 0) initJigsaw();
+  if (idx === 1) initTimeline();
+  if (idx === 2) { /* diary is static */ }
+  if (idx === 3) initFragments();
+}
+
+/* ─────────────────────────────────────────────────────────
+   CHAPTER 1 — JIGSAW
+───────────────────────────────────────────────────────── */
+let _jigsawDone = false;
+let _dragging   = null;
+
+function initJigsaw() {
+  if (_jigsawDone) return;
+  const GRID = 4, PS = window.innerWidth < 560 ? 62 : 80;
+  const board = document.getElementById('pb');
+  const tray  = document.getElementById('pt');
+  board.innerHTML = tray.innerHTML = '';
+
+  /* board slots */
+  for (let i = 0; i < GRID * GRID; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'p-slot';
+    slot.dataset.slot = i;
+    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('hover'); });
+    slot.addEventListener('dragleave', () => slot.classList.remove('hover'));
+    slot.addEventListener('drop', e => { e.preventDefault(); slot.classList.remove('hover'); drop(slot); });
+    board.appendChild(slot);
+  }
+
+  /* pieces — shuffled */
+  const idx = shuffle(Array.from({ length: GRID * GRID }, (_, i) => i));
+  idx.forEach(pi => {
+    const col = pi % GRID, row = Math.floor(pi / GRID);
+    const p = document.createElement('div');
+    p.className = 'p-piece';
+    p.dataset.pi = pi;
+    p.draggable = true;
+    p.style.backgroundImage  = `url('${CFG.jigsawPhoto}')`;
+    p.style.backgroundSize   = `${GRID * PS}px ${GRID * PS}px`;
+    p.style.backgroundPosition = `-${col * PS}px -${row * PS}px`;
+    p.style.width = p.style.height = PS + 'px';
+
+    p.addEventListener('dragstart', e => { _dragging = p; p.classList.add('grabbing'); e.dataTransfer.effectAllowed = 'move'; });
+    p.addEventListener('dragend',   () => { p.classList.remove('grabbing'); _dragging = null; });
+
+    /* touch */
+    let tx, ty;
+    p.addEventListener('touchstart', e => {
+      _dragging = p; p.classList.add('grabbing');
+      const t = e.touches[0]; tx = t.clientX; ty = t.clientY;
+    }, { passive: true });
+    p.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const t = e.touches[0];
+      p.style.position = 'fixed'; p.style.zIndex = '500';
+      p.style.left = (t.clientX - PS / 2) + 'px';
+      p.style.top  = (t.clientY - PS / 2) + 'px';
+    }, { passive: false });
+    p.addEventListener('touchend', e => {
+      e.preventDefault();
+      p.style.cssText = '';
+      p.classList.remove('grabbing');
+      const t = e.changedTouches[0];
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      const sl = el?.closest('.p-slot');
+      if (sl) drop(sl);
+      _dragging = null;
+    }, { passive: false });
+
+    tray.appendChild(p);
+  });
+}
+
+function drop(slot) {
+  if (!_dragging) return;
+  if (slot.firstChild) document.getElementById('pt').appendChild(slot.firstChild);
+  slot.appendChild(_dragging);
+  const PS = window.innerWidth < 560 ? 62 : 80;
+  _dragging.style.width = _dragging.style.height = PS + 'px';
+  if (parseInt(_dragging.dataset.pi) === parseInt(slot.dataset.slot)) {
+    slot.classList.add('correct');
+    _dragging.style.boxShadow = '0 0 10px rgba(201,168,76,.9)';
+  }
+  checkJigsaw();
+}
+
+function checkJigsaw() {
+  if (_jigsawDone) return;
+  const slots = document.querySelectorAll('#pb .p-slot');
+  const ok = [...slots].every(s => {
+    const p = s.firstChild;
+    return p && parseInt(p.dataset.pi) === parseInt(s.dataset.slot);
+  });
+  if (ok) { _jigsawDone = true; setTimeout(rewardCh1, 700); }
+}
+
+function rewardCh1() {
+  document.getElementById('ch1-puzzle').style.display = 'none';
+  const r = document.getElementById('r1');
+  r.style.display = 'flex';
+  buildPhotos('photos1', CFG.photos.ch1);
+  setTimeout(() => revealFragment('fb1', CFG.fragments[0]), 2200);
+  STATE.done[0] = true;
+}
+
+/* ─────────────────────────────────────────────────────────
+   CHAPTER 2 — TIMELINE
+───────────────────────────────────────────────────────── */
+let _tlDone  = false;
+let _tlDragSrc = null;
+
+function initTimeline() {
+  if (_tlDone) return;
+  const cont = document.getElementById('tl-cards');
+  cont.innerHTML = '';
+
+  shuffle([...CFG.memories]).forEach(mem => {
+    const card = document.createElement('div');
+    card.className = 'tl-card';
+    card.draggable  = true;
+    card.dataset.mi = CFG.memories.indexOf(mem);
+    card.innerHTML  = `<span class="tl-handle">⠿</span><span class="tl-emoji">${mem.emoji}</span><span class="tl-text">${mem.text}</span>`;
+
+    card.addEventListener('dragstart', e => { _tlDragSrc = card; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    card.addEventListener('dragend',   () => { card.classList.remove('dragging'); document.querySelectorAll('.tl-card').forEach(c => c.classList.remove('over')); });
+    card.addEventListener('dragover',  e => { e.preventDefault(); if (card !== _tlDragSrc) card.classList.add('over'); });
+    card.addEventListener('dragleave', () => card.classList.remove('over'));
+    card.addEventListener('drop', e => {
+      e.preventDefault(); card.classList.remove('over');
+      if (_tlDragSrc && _tlDragSrc !== card) {
+        const p = cont;
+        const ai = [...p.children].indexOf(_tlDragSrc);
+        const bi = [...p.children].indexOf(card);
+        p.insertBefore(_tlDragSrc, ai < bi ? card.nextSibling : card);
+      }
+      _tlDragSrc = null;
+    });
+
+    cont.appendChild(card);
+  });
+}
+
+function checkTimeline() {
+  const cards   = [...document.querySelectorAll('#tl-cards .tl-card')];
+  const current = cards.map(c => parseInt(c.dataset.mi));
+  const msg     = document.getElementById('tl-msg');
+
+  if (JSON.stringify(current) === JSON.stringify(CFG.timelineOrder)) {
+    msg.style.color = 'var(--gold)';
+    msg.textContent = 'Yes. This is how it happened.';
+    _tlDone = true;
+    setTimeout(rewardCh2, 1200);
+  } else {
+    msg.style.color = '#c97a4c';
+    msg.textContent = 'The memories are out of order. Try again.';
+  }
+}
+
+function rewardCh2() {
+  document.getElementById('ch2-puzzle').style.display = 'none';
+  const r = document.getElementById('r2');
+  r.style.display = 'flex';
+  buildPhotos('photos2', CFG.photos.ch2);
+  setTimeout(() => revealFragment('fb2', CFG.fragments[1]), 2200);
+  STATE.done[1] = true;
+}
+
+/* ─────────────────────────────────────────────────────────
+   CHAPTER 3 — DIARY
+───────────────────────────────────────────────────────── */
+let _diaryDone = false;
+
+function norm(s) { return s.trim().toLowerCase().replace(/\s+/g, ' '); }
+
+function checkDiary() {
+  if (_diaryDone) return;
+  const vals = {
+    movie: document.getElementById('d-movie').value,
+    cafe:  document.getElementById('d-cafe').value,
+    nick:  document.getElementById('d-nick').value,
+    sweet: document.getElementById('d-sweet').value,
+  };
+  const keys = ['movie', 'cafe', 'nick', 'sweet'];
+  const cfgk  = ['movie', 'cafe', 'nickname', 'dessert'];
+
+  let allFilled  = keys.every(k => vals[k].trim());
+  let allCorrect = true;
+
+  keys.forEach((k, i) => {
+    const inp = document.getElementById('d-' + k);
+    if (!vals[k].trim()) return;
+    const ok = CFG.diary[cfgk[i]].some(a => norm(a) === norm(vals[k]));
+    inp.classList.toggle('ok',    ok);
+    inp.classList.toggle('wrong', !ok);
+    if (!ok) allCorrect = false;
+  });
+
+  const msg = document.getElementById('diary-msg');
+  if (!allFilled)        { msg.textContent = 'A few blanks remain...'; return; }
+  if (!allCorrect)       { msg.textContent = 'Some memories are hiding. Try again.'; return; }
+
+  msg.textContent = 'The diary remembers. So do I.';
+  _diaryDone = true;
+  setTimeout(rewardCh3, 1300);
+}
+
+function rewardCh3() {
+  document.getElementById('ch3-puzzle').style.display = 'none';
+  const r = document.getElementById('r3');
+  r.style.display = 'flex';
+  buildPhotos('photos3', CFG.photos.ch3);
+  setTimeout(() => revealFragment('fb3', CFG.fragments[2]), 2200);
+  STATE.done[2] = true;
+}
+
+/* ─────────────────────────────────────────────────────────
+   CHAPTER 4 — FRAGMENT ASSEMBLY
+───────────────────────────────────────────────────────── */
+let _ch4phase = 0;
+
+function initFragments() {
+  if (_ch4phase > 0) return;
+  STATE.done[3] = false; // reset guard
+
+  /* reveal chips one by one */
+  ['fc0','fc1','fc2'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.textContent = `"${CFG.fragments[i]}"`;
+    setTimeout(() => el.classList.add('appear'), 500 + i * 700);
+  });
+
+  /* after chips visible, animate assembly */
+  setTimeout(animateAssembly, 500 + 3 * 700 + 1000);
+}
+
+function animateAssembly() {
+  const txt = document.getElementById('assembly-text');
+  txt.innerHTML = `
+    You are <em style="color:var(--ink2);">"${CFG.fragments[0]}"</em>,<br>
+    <em style="color:var(--ink2);">"${CFG.fragments[1]}"</em>,<br>
+    <em style="color:var(--ink2);">"${CFG.fragments[2]}"</em>...<br>
+    <span style="opacity:.35;">and&nbsp;&nbsp;&nbsp;___&nbsp;&nbsp;&nbsp;?</span>
+  `;
+  txt.style.opacity = '1';
+
+  setTimeout(() => {
+    document.getElementById('missing-hint').style.opacity = '1';
+    setTimeout(() => { document.getElementById('heart-btn').style.opacity = '1'; }, 1200);
+  }, 1600);
+}
+
+function heartClick() {
+  const box  = document.getElementById('assembly-text');
+  const hint = document.getElementById('missing-hint');
+  const hb   = document.getElementById('heart-btn');
+
+  hint.style.opacity = '0';
+  hb.style.opacity   = '0';
+
+  setTimeout(() => {
+    box.innerHTML = `
+      You are <em style="color:var(--ink2);">"${CFG.fragments[0]}"</em>,<br>
+      <em style="color:var(--ink2);">"${CFG.fragments[1]}"</em>,<br>
+      <em style="color:var(--ink2);">"${CFG.fragments[2]}"</em>...<br>
+      <br>
+      <span style="font-size:1.35em; color:#8b6914; letter-spacing:.05em;">प्रेम हो।</span>
+    `;
+    STATE.done[3] = true;
+
+    const rb = document.getElementById('ready-btn');
+    rb.classList.add('show');
+    setTimeout(() => rb.style.opacity = '1', 100);
+  }, 900);
+}
+
+/* ─────────────────────────────────────────────────────────
+   POEM
+───────────────────────────────────────────────────────── */
+function goPoem() {
+  show('s6');
+  setTimeout(revealPoem, 700);
+}
+
+function revealPoem() {
+  const q = document.getElementById('poem-q');
+  const b = document.getElementById('poem-body');
+  b.innerHTML = '';
+
+  q.style.opacity = '1';
+
+  let delay = 2200;
+  CFG.poem.forEach(html => {
+    const div = document.createElement('div');
+    div.className = 'stanza';
+    div.innerHTML = html;
+    b.appendChild(div);
+    setTimeout(() => div.classList.add('in'), delay);
+    delay += 2800;
+  });
+
+  /* final couplet */
+  setTimeout(() => {
+    const fin = document.createElement('div');
+    fin.className = 'poem-final';
+    fin.innerHTML = CFG.poemEnding;
+    b.appendChild(fin);
+    setTimeout(() => {
+      fin.style.opacity = '1';
+      setTimeout(goBirthday, 5000);
+    }, 400);
+  }, delay + 1000);
+}
+
+/* ─────────────────────────────────────────────────────────
+   BIRTHDAY GALLERY
+───────────────────────────────────────────────────────── */
+function goBirthday() {
+  show('s7');
+  setTimeout(() => {
+    confetti(90);
+    buildGallery();
+  }, 500);
+}
+
+function buildGallery() {
+  const field = document.getElementById('gallery');
+  field.innerHTML = '';
+
+  const photos = CFG.photos.all;
+  const W = innerWidth, H = innerHeight;
+
+  photos.forEach((src, i) => {
+    setTimeout(() => {
+      const img = document.createElement('img');
+      img.src = src; img.className = 'float-photo';
+      const w = 120 + Math.random() * 90;
+      const h = 90  + Math.random() * 70;
+      const rot = (Math.random() - .5) * 14;
+      img.style.left   = (Math.random() * (W - w)) + 'px';
+      img.style.top    = (Math.random() * (H - h)) + 'px';
+      img.style.width  = w + 'px';
+      img.style.height = h + 'px';
+      img.style.setProperty('--r', rot + 'deg');
+      img.style.animationDelay = '0s';
+      field.appendChild(img);
+    }, i * 280);
+  });
+
+  setTimeout(() => {
+    const cta = document.getElementById('gallery-cta');
+    cta.classList.add('in');
+  }, photos.length * 280 + 1800);
+}
+
+function openVideo() {
+  document.getElementById('vid-overlay').classList.add('open');
+}
+function skipToFinal() {
+  document.getElementById('vid-overlay').classList.remove('open');
+  document.getElementById('vid').pause();
+  goFinal();
+}
+
+/* also allow continuing after video ends naturally */
+document.getElementById('vid').addEventListener('ended', skipToFinal);
+
+/* ─────────────────────────────────────────────────────────
+   FINAL LETTER
+───────────────────────────────────────────────────────── */
+function goFinal() {
+  show('s8');
+  setTimeout(() => {
+    document.getElementById('final-body').classList.add('in');
+    setTimeout(() => {
+      document.getElementById('final-sign').classList.add('in');
+      setTimeout(() => {
+        const btn = document.getElementById('again-btn');
+        btn.style.display = 'block';
+        requestAnimationFrame(() => requestAnimationFrame(() => btn.style.opacity = '1'));
+        btn.style.transition = 'opacity .9s ease, background .3s, border-color .3s, box-shadow .3s';
+      }, 1400);
+    }, 1200);
+  }, 600);
+}
+
+function readAgain() {
+  localStorage.setItem('hl_sr', '1');
+  window.location.reload();
+}
+
+/* ─────────────────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────────────────── */
+function buildPhotos(containerId, srcs) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  srcs.forEach((src, i) => {
+    const img = document.createElement('img');
+    img.src = src; img.className = 'photo-tile'; img.alt = '';
+    c.appendChild(img);
+    setTimeout(() => img.classList.add('in'), 200 + i * 320);
+  });
+}
+
+function revealFragment(id, text) {
+  const el = document.getElementById(id);
+  el.textContent = `"${text}"`;
+  el.classList.add('clear');
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function confetti(n) {
+  const cols = ['#c9a84c','#ffd6a5','#ff9b9b','#a8d8ea','#d4f0b0','#ffffff'];
+  for (let i = 0; i < n; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'conf';
+      el.style.left     = Math.random() * 100 + 'vw';
+      el.style.width    = (4 + Math.random() * 7) + 'px';
+      el.style.height   = (4 + Math.random() * 7) + 'px';
+      el.style.background = cols[Math.floor(Math.random() * cols.length)];
+      el.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+      el.style.animationDuration = (2.2 + Math.random() * 2) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4500);
+    }, i * 55);
+  }
+}
+
+</script>
+</body>
+</html>
