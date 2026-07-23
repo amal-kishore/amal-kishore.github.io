@@ -175,8 +175,19 @@ h4 {
 
 .about-grid {
   display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 3.5rem; align-items: start;
+  grid-template-columns: 180px 1fr 300px;
+  gap: 3rem; align-items: start;
+}
+
+.about-photo-col { text-align: center; }
+
+.profile-photo {
+  width: 160px; height: 160px;
+  object-fit: cover; object-position: top;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  box-shadow: var(--shadow-md);
+  display: block; margin: 0 auto;
 }
 
 .about-bio p {
@@ -487,6 +498,7 @@ footer p + p { margin-top: .3rem; }
 /* ─── RESPONSIVE ─────────────────────────────────────────── */
 @media (max-width: 900px) {
   .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .about-photo-col { display: none; }
   .research-overview, .code-projects { grid-template-columns: 1fr; gap: 1.5rem; }
   .research-image, .code-image { display: none; }
 }
