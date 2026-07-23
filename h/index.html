@@ -1033,13 +1033,12 @@ const CFG = {
 
   /* Chapter 3 — diary answers (case-insensitive, trimmed).
      Each key can hold multiple accepted spellings.          */
+  /* Diary — each array holds keywords; her answer just needs to CONTAIN one of them */
   diary: {
-    movie:    ['Agar Main Kahoon', 'agar main kahoon', 'agar main kahu',
-               'agar mai kahoon', 'agar mai kahu', 'agar mai kahun'],
-    cafe:     ['kadi kachori', 'kadi-kachori', 'kadhi kachori',
-               'kadhi-kachori', 'kadi kachouri'],
-    nickname: ['khargosh', 'Khargosh', 'bunbun', 'bun bun', 'BunBun'],
-    dessert:  ['ghewar', 'Ghewar', 'ghevар', 'ghevra'],
+    movie:    ['agar'],                          // "agar main kahoon", "agar hum kahen" — all start with agar
+    cafe:     ['kadi', 'kachori', 'kahori'],     // any spelling of kadi kachori
+    nickname: ['khargosh', 'bunbun', 'bun bun', 'rabbit'],
+    dessert:  ['ghew', 'ghevar'],               // ghewar, ghevra, etc.
   },
 
   /* Chapter 2 — memories in chronological order.
@@ -1522,6 +1521,11 @@ let _diaryDone = false;
 
 function norm(s) { return s.trim().toLowerCase().replace(/\s+/g, ' '); }
 
+function matchesDiary(typed, keywords) {
+  const t = norm(typed);
+  return keywords.some(kw => t.includes(norm(kw)));
+}
+
 function checkDiary() {
   if (_diaryDone) return;
   const vals = {
@@ -1531,23 +1535,23 @@ function checkDiary() {
     sweet: document.getElementById('d-sweet').value,
   };
   const keys = ['movie', 'cafe', 'nick', 'sweet'];
-  const cfgk  = ['movie', 'cafe', 'nickname', 'dessert'];
+  const cfgk = ['movie', 'cafe', 'nickname', 'dessert'];
 
-  let allFilled  = keys.every(k => vals[k].trim());
-  let allCorrect = true;
+  const allFilled = keys.every(k => vals[k].trim());
+  let   allCorrect = true;
 
   keys.forEach((k, i) => {
     const inp = document.getElementById('d-' + k);
     if (!vals[k].trim()) return;
-    const ok = CFG.diary[cfgk[i]].some(a => norm(a) === norm(vals[k]));
+    const ok = matchesDiary(vals[k], CFG.diary[cfgk[i]]);
     inp.classList.toggle('ok',    ok);
     inp.classList.toggle('wrong', !ok);
     if (!ok) allCorrect = false;
   });
 
   const msg = document.getElementById('diary-msg');
-  if (!allFilled)        { msg.textContent = 'A few blanks remain...'; return; }
-  if (!allCorrect)       { msg.textContent = 'Some memories are hiding. Try again.'; return; }
+  if (!allFilled)  { msg.textContent = 'A few blanks remain...'; return; }
+  if (!allCorrect) { msg.textContent = 'Some memories are hiding. Try again.'; return; }
 
   msg.textContent = 'The diary remembers. So do I.';
   _diaryDone = true;
